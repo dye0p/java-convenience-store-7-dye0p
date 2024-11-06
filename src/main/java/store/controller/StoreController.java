@@ -19,7 +19,7 @@ public class StoreController {
 
     public void run() {
         outputView.printWellComeMessage();
-        Products products = FileReader.readerFile();
+        Products products = FileReader.readerProductFile();
         outputView.printProducts(products);
 
         List<Cart> carts = tryReadItem();

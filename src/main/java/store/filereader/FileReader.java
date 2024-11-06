@@ -10,7 +10,7 @@ import store.model.Products;
 
 public class FileReader {
 
-    public static Products readerFile() {
+    public static Products readerProductFile() {
         List<Product> products = new ArrayList<>();
 
         File file = new File("src/main/resources/products.md");
