@@ -1,6 +1,8 @@
 package store.controller;
 
+import java.util.List;
 import store.filereader.FileReader;
+import store.model.Cart;
 import store.model.Products;
 import store.view.InputView;
 import store.view.OutputView;
@@ -20,6 +22,17 @@ public class StoreController {
         Products products = FileReader.readerFile();
         outputView.printProducts(products);
 
-        String[] items = inputView.readItem();
+        List<Cart> carts = tryReadItem();
+    }
+
+
+    private List<Cart> tryReadItem() {
+        while (true) {
+            try {
+                return inputView.readItem();
+            } catch (IllegalArgumentException exception) {
+                outputView.printErrorMessage(exception.getMessage());
+            }
+        }
     }
 }

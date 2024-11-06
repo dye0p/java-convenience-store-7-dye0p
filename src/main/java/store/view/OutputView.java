@@ -14,4 +14,8 @@ public class OutputView {
         String formatterProducts = OutputFormatter.formatterProducts(products);
         System.out.println(formatterProducts);
     }
+
+    public void printErrorMessage(String message) {
+        System.out.print(message);
+    }
 }
