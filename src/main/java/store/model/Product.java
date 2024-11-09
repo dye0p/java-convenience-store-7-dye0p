@@ -14,6 +14,10 @@ public class Product {
         this.promotion = promotion;
     }
 
+    public boolean isSameName(String name) {
+        return this.name.equals(name);
+    }
+
     public boolean isRegular() {
         return promotion == null;
     }
