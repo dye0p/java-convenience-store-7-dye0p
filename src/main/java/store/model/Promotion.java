@@ -18,6 +18,10 @@ public class Promotion {
         this.endDate = endDate;
     }
 
+    public boolean isWithinPromotionDate(LocalDateTime now) {
+        return (now.isEqual(startDate) || now.isAfter(startDate)) && (now.isEqual(endDate) || now.isBefore(endDate));
+    }
+
     public String getName() {
         return name;
     }
