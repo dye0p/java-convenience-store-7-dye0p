@@ -61,4 +61,40 @@ class ProductManagerTest {
         assertThatCode(() -> productManager.validateExistent("콜라"))
                 .doesNotThrowAnyException();
     }
+
+    @DisplayName("구입한 상품이 프로모션 상품이라면 true를 반환한다.")
+    @Test
+    void isPromotionProduct() {
+        //given
+        Product product = new Product("콜라", 1000, 10, "탄산2+1");
+        Product product1 = new Product("감자칩", 1000, 10, null);
+
+        Products products = new Products(List.of(product, product1));
+
+        ProductManager productManager = new ProductManager(products);
+
+        //when
+        boolean result = productManager.isPromotionProduct("콜라");
+
+        //then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("구입한 상품이 프로모션 상품이 아니라면 false를 반환한다.")
+    @Test
+    void isNotPromotionProduct() {
+        //given
+        Product product = new Product("콜라", 1000, 10, "탄산2+1");
+        Product product1 = new Product("감자칩", 1000, 10, null);
+
+        Products products = new Products(List.of(product, product1));
+
+        ProductManager productManager = new ProductManager(products);
+
+        //when
+        boolean result = productManager.isPromotionProduct("감자칩");
+
+        //then
+        assertThat(result).isFalse();
+    }
 }
