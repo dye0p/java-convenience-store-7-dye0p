@@ -6,6 +6,7 @@ import store.filereader.FileReader;
 import store.model.Cart;
 import store.model.ProductManager;
 import store.model.Products;
+import store.model.PromotionManager;
 import store.view.InputView;
 import store.view.OutputView;
 
@@ -14,10 +15,12 @@ public class StoreController {
     private final InputView inputView;
     private final OutputView outputView;
     private ProductManager productManager;
+    private PromotionManager promotionManager;
 
     public StoreController(InputView inputView, OutputView outputView) {
         this.inputView = inputView;
         this.outputView = outputView;
+        this.promotionManager = new PromotionManager(FileReader.readerPromotionFile().getPromotions());
     }
 
     public void run() {
@@ -37,7 +40,6 @@ public class StoreController {
         outputView.printWellComeMessage();
         outputView.printProducts(products);
     }
-
 
     private List<Cart> tryReadItem() {
         while (true) {
