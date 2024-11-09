@@ -19,6 +19,15 @@ public class ProductManager {
         }
     }
 
+    public boolean isPromotionProduct(String productName) {
+        Product promotionProduct = this.promotionProducts.get(productName);
+        if (promotionProduct == null) {
+            return false;
+        }
+        return promotionProduct.getPromotion() != null;
+    }
+
+
     public int sumProductQuantityByName(String name) {
         int sum = 0;
         return sumQuantity(name, sum);
