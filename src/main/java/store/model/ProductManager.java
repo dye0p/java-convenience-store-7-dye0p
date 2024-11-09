@@ -19,13 +19,27 @@ public class ProductManager {
         }
     }
 
-    public int getProductQuantityByName(String name) {
+    public int sumProductQuantityByName(String name) {
         int sum = 0;
+        return sumQuantity(name, sum);
+    }
+
+    private int sumQuantity(String name, int sum) {
+        sum = sumBasicProductQuantity(name, sum);
+        sum = sumPromotionProductQuantity(name, sum);
+        return sum;
+    }
+
+    private int sumBasicProductQuantity(String name, int sum) {
         for (Product product : basicProducts.values()) {
             if (product.isSameName(name)) {
                 sum += product.getQuantity();
             }
         }
+        return sum;
+    }
+
+    private int sumPromotionProductQuantity(String name, int sum) {
         for (Product product : promotionProducts.values()) {
             if (product.isSameName(name)) {
                 sum += product.getQuantity();
@@ -34,7 +48,7 @@ public class ProductManager {
         return sum;
     }
 
-    public void containsProduct(String name) {
+    public void validateExistent(String name) {
         if (!basicProducts.containsKey(name) && !promotionProducts.containsKey(name)) {
             throw new IllegalArgumentException(ErrorMessage.NOT_FOUNT_PRODUCT.getMessage());
         }
