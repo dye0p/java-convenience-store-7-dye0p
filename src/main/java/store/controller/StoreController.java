@@ -85,6 +85,17 @@ public class StoreController {
             giftCount = handleAddGift(cart, promotionProduct, giftCount, promotionEventResult);
         }
 
+        //아무조건도 안걸릴때
+        else if (cart.getQuantity() <= promotionProduct.getQuantity() && promotionManager.isNotEnoughPromotionQuantity(
+                cart.getQuantity(), promotionProduct)) {
+            //수입량 수량에 따라서 받을 수 있는 증정 개수 계산
+            int freeCount = getGiftCount(cart, promotionProduct);
+            promotionEventResult.put(cart.getName(), freeCount);
+            giftCount += promotionProduct.getPrice() * freeCount;
+            //재고 차감
+            promotionProduct.deductQuantity(cart.getQuantity());
+        }
+
         return giftCount;
     }
 
