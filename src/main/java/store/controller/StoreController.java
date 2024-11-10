@@ -56,6 +56,11 @@ public class StoreController {
             if (promotionProduct != null) {
                 giftCount = todayPromotionAvailable(cart, promotionProduct, giftCount, promotionEventResult);
             }
+        } else {
+            // 일반 상품은 프로모션 혜택이 없음
+            Product basicProduct = productManager.getBasicByName(cart.getName());
+            nonPromotionItems.put(cart, basicProduct.getPrice());
+            basicProduct.deductQuantity(cart.getQuantity()); //재고 변경
         }
         return giftCount;
     }
@@ -136,9 +141,6 @@ public class StoreController {
             giftCount = plusGiftCount(cart, promotionProduct, giftCount, promotionEventResult);
         }
 
-        if (choice.equals("N")) {
-
-        }
         return giftCount;
     }
 
