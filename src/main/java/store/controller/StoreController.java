@@ -11,6 +11,7 @@ import store.filereader.FileReader;
 import store.filereader.FileWriter;
 import store.model.Cart;
 import store.model.EventResult;
+import store.model.Membership;
 import store.model.Product;
 import store.model.ProductManager;
 import store.model.Products;
@@ -23,6 +24,9 @@ import store.view.InputView;
 import store.view.OutputView;
 
 public class StoreController {
+
+    private static final String YES_CHOICE = "Y";
+    private static final String NO_CHOICE = "N";
 
     private final InputView inputView;
     private final OutputView outputView;
@@ -127,10 +131,10 @@ public class StoreController {
     private int selectPromotionQuantity(Cart cart, int nonPromotionQuantity, Product promotionProduct,
                                         Map<String, Integer> promotionEventResult, int giftCount) {
         String choice = inputView.readEnoughPromotionQuantity(cart.getName(), nonPromotionQuantity);
-        if (choice.equals("Y")) {
+        if (choice.equals(YES_CHOICE)) {
             giftCount = giftAccept(cart, promotionProduct, promotionEventResult, giftCount);
         }
-        if (choice.equals("N")) {
+        if (choice.equals(NO_CHOICE)) {
             giftRefuse(cart, promotionProduct);
         }
         return giftCount;
@@ -163,7 +167,7 @@ public class StoreController {
     private int handleAddGift(Cart cart, Product promotionProduct, int giftCount,
                               Map<String, Integer> promotionEventResult) {
         String choice = inputView.readGift(cart.getName());
-        if (choice.equals("Y")) {
+        if (choice.equals(YES_CHOICE)) {
             giftCount = plusGiftCount(cart, promotionProduct, giftCount, promotionEventResult);
         }
 
@@ -190,18 +194,23 @@ public class StoreController {
         return promotionProduct.calculatePromotionGift(cart);
     }
 
-    private int membershipEvent(EventResult promotionEventResult) {
-        int nonPromotionPrice = getNonPromotionPrice(promotionEventResult);
+    private int membershipEvent(EventResult eventResult) {
         String choice = inputView.readMemberShip();
-        int membershipDiscount = 0;
-        if (choice.equals("Y")) {
-            membershipDiscount += nonPromotionPrice * 0.3;
+        int discountPrice = 0;
+        if (choice.equals(YES_CHOICE)) {
+            discountPrice = progressDiscount(eventResult);
         }
-        return membershipDiscount;
+        return discountPrice;
     }
 
-    private int getNonPromotionPrice(EventResult promotionEventResult) {
-        Map<Cart, Integer> nonPromotionProducts = promotionEventResult.getNonPromotionEventResult();
+    private int progressDiscount(EventResult eventResult) {
+        Membership membership = new Membership();
+        int nonPromotionPrice = getNonPromotionPrice(eventResult);
+        return membership.calculateDiscount(nonPromotionPrice);
+    }
+
+    private int getNonPromotionPrice(EventResult eventResult) {
+        Map<Cart, Integer> nonPromotionProducts = eventResult.getNonPromotionEventResult();
         return calculateNonPromotionPrice(nonPromotionProducts);
     }
 
@@ -242,8 +251,7 @@ public class StoreController {
         return buyResults;
     }
 
-    private List<PresentationResult> getPresentationResults(EventResult promotionEventResult,
-                                                            List<Cart> carts) {
+    private List<PresentationResult> getPresentationResults(EventResult promotionEventResult, List<Cart> carts) {
         Map<String, Integer> promotionEventMap = promotionEventResult.getPromotionEventResult();
         return calculatePresentationResults(carts, promotionEventMap);
     }
@@ -281,14 +289,13 @@ public class StoreController {
 
     private void createReceipt(int totalPrice, EventResult promotionEventResult, int membershipDiscount,
                                List<BuyResult> buyResults, List<PresentationResult> presentationResults) {
-        PriceResult priceResult = new PriceResult(totalPrice, promotionEventResult.getGiftCount(),
-                membershipDiscount);
+        PriceResult priceResult = new PriceResult(totalPrice, promotionEventResult.getGiftCount(), membershipDiscount);
         getReceipt(buyResults, presentationResults, priceResult);
     }
 
     private void continueRetry() {
         String choice = inputView.readReplay();
-        if (choice.equals("Y")) {
+        if (choice.equals(YES_CHOICE)) {
             System.out.println();
             run();
         }
