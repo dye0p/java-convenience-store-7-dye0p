@@ -10,15 +10,19 @@ public class Cart {
         this.quantity = quantity;
     }
 
+    public void changeQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void plusGiftQuantity() {
+        this.quantity += 1;
+    }
+
     public String getName() {
         return name;
     }
 
     public int getQuantity() {
         return quantity;
-    }
-
-    public void changeQuantity(int quantity) {
-        this.quantity = quantity;
     }
 }

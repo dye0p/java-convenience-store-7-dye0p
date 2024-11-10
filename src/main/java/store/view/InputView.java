@@ -22,4 +22,11 @@ public class InputView {
 
         return Console.readLine();
     }
+
+    public String readGift(String name) {
+        String format = String.format("현재 %s은(는) 1개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)", name);
+        System.out.println(NEXT_LINE + format);
+
+        return Console.readLine();
+    }
 }

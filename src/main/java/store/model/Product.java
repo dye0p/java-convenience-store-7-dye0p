@@ -14,6 +14,20 @@ public class Product {
         this.promotion = promotion;
     }
 
+    public int calculatePromotionGift(Cart cart) {
+        int giftCount = 0;
+        if (this.promotion.equals("탄산2+1")) {
+            int quantity = cart.getQuantity();
+            giftCount += quantity / 3;
+        }
+
+        if (this.promotion.equals("MD추천상품") || this.promotion.equals("반짝할인")) {
+            int quantity = cart.getQuantity();
+            giftCount += quantity / 2;
+        }
+        return giftCount;
+    }
+
     public int calculateNotPromotionQuantity(int quantity) {
         int nonPromotionQuantity = 0;
 
@@ -63,5 +77,4 @@ public class Product {
     public String getPromotion() {
         return promotion;
     }
-
 }

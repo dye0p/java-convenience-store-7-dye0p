@@ -36,4 +36,10 @@ public class PromotionManager {
 
         return quantity / (buy + get);
     }
+
+    public boolean isNotEnoughPromotionQuantity(int quantity, Product promotionProduct) {
+        Promotion promotion = promotionMap.get(promotionProduct.getPromotion());
+        return promotion.isPossiblePromotionQuantity(quantity, promotionProduct);
+    }
+
 }

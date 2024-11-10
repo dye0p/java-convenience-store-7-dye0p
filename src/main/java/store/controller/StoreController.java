@@ -49,60 +49,67 @@ public class StoreController {
         return new EventResult(promotionEventResult, giftCount, nonPromotionResult);
     }
 
-    private int progressEvent(Cart cart, int giftCount, Map<String, Integer> promotionEventMap,
+    private int progressEvent(Cart cart, int giftCount, Map<String, Integer> promotionEventResult,
                               Map<Cart, Integer> nonPromotionItems) {
         if (productManager.isPromotionProduct(cart.getName())) {
             Product promotionProduct = productManager.getPromotionByName(cart.getName());
             if (promotionProduct != null) {
-                giftCount = todayPromotionAvailable(cart, promotionProduct, giftCount, promotionEventMap);
+                giftCount = todayPromotionAvailable(cart, promotionProduct, giftCount, promotionEventResult);
             }
         }
         return giftCount;
     }
 
     private int todayPromotionAvailable(Cart cart, Product promotionProduct, int giftCount,
-                                        Map<String, Integer> promotionEventMap) {
+                                        Map<String, Integer> promotionEventResult) {
         LocalDateTime now = DateTimes.now();
         if (promotionManager.isTodayPromotionAvailable(promotionProduct.getPromotion(), now)) {
 
-            giftCount = progressPromotionEvent(cart, giftCount, promotionProduct, promotionEventMap);
+            giftCount = progressPromotionEvent(cart, giftCount, promotionProduct, promotionEventResult);
         }
         return giftCount;
     }
 
     private int progressPromotionEvent(Cart cart, int giftCount, Product promotionProduct,
-                                       Map<String, Integer> promotionEventMap) {
-        giftCount = notEnoughPromotionQuantity(cart, promotionProduct, giftCount, promotionEventMap);
+                                       Map<String, Integer> promotionEventResult) {
+        giftCount = notEnoughPromotionQuantity(cart, promotionProduct, giftCount, promotionEventResult);
+
+        // 프로모션 적용이 가능한 상품에 대해 고객이 해당 수량보다 적게 가져온 경우, 그 수량만큼 추가 여부를 입력받는다
+        if (cart.getQuantity() <= promotionProduct.getQuantity() && !promotionManager.isNotEnoughPromotionQuantity(
+                cart.getQuantity(), promotionProduct)) {
+            giftCount = handleAddGift(cart, promotionProduct, giftCount, promotionEventResult);
+        }
+
         return giftCount;
     }
 
     private int notEnoughPromotionQuantity(Cart cart, Product promotionProduct, int giftCount,
-                                           Map<String, Integer> promotionEventMap) {
+                                           Map<String, Integer> promotionEventResult) {
         if (cart.getQuantity() > promotionProduct.getQuantity()) {
             int nonPromotionQuantity = promotionManager.notPromotionByQuantity(cart.getQuantity(), promotionProduct);
-            giftCount = selectPromotionQuantity(cart, nonPromotionQuantity, promotionProduct, promotionEventMap,
+            giftCount = selectPromotionQuantity(cart, nonPromotionQuantity, promotionProduct, promotionEventResult,
                     giftCount);
         }
         return giftCount;
     }
 
     private int selectPromotionQuantity(Cart cart, int nonPromotionQuantity, Product promotionProduct,
-                                        Map<String, Integer> promotionEventMap, int giftCount) {
+                                        Map<String, Integer> promotionEventResult, int giftCount) {
         String choice = inputView.readEnoughPromotionQuantity(cart.getName(), nonPromotionQuantity);
         if (choice.equals("Y")) {
-            giftCount = giftAccept(cart, promotionProduct, promotionEventMap, giftCount);
+            giftCount = giftAccept(cart, promotionProduct, promotionEventResult, giftCount);
         }
         if (choice.equals("N")) {
             giftRefuse(cart, promotionProduct);
         }
-
         return giftCount;
     }
 
-    private int giftAccept(Cart cart, Product promotionProduct, Map<String, Integer> promotionEventMap, int giftCount) {
+    private int giftAccept(Cart cart, Product promotionProduct, Map<String, Integer> promotionEventResult,
+                           int giftCount) {
         //받을 수 있는 증정 개수 담기
         int maxGiftCount = promotionManager.calculateGiftCount(promotionProduct);
-        promotionEventMap.put(cart.getName(), maxGiftCount);
+        promotionEventResult.put(cart.getName(), maxGiftCount);
         giftCount += promotionProduct.getPrice() * maxGiftCount;
         //일부 수량에 대해 정가로 결제한다.
         //프로모션 상품은 모두 차감하고 모자란 만킄 일반 재고에서 나머지를 차감한다.
@@ -120,6 +127,40 @@ public class StoreController {
         int quantity = cart.getQuantity() - promotionProduct.getQuantity();
         cart.changeQuantity(quantity); //구입 수량 변경
         promotionProduct.deductQuantity(promotionProduct.getQuantity());
+    }
+
+    private int handleAddGift(Cart cart, Product promotionProduct, int giftCount,
+                              Map<String, Integer> promotionEventResult) {
+        String choice = inputView.readGift(cart.getName());
+        if (choice.equals("Y")) {
+            giftCount = plusGiftCount(cart, promotionProduct, giftCount, promotionEventResult);
+        }
+
+        if (choice.equals("N")) {
+
+        }
+        return giftCount;
+    }
+
+    private int plusGiftCount(Cart cart, Product promotionProduct, int giftCount,
+                              Map<String, Integer> promotionEventResult) {
+        //한개를 더 받으면 해당 상품의 수량에 하나를 더 추가한다.
+        cart.plusGiftQuantity();
+
+        //그리고 추가 증정할인이 들어간다.
+        //1개만 추가되는것이 아니라 기존의 증정에서 1개가 추가되는 것이다.
+        int existingGiftCount = getGiftCount(cart, promotionProduct);
+        giftCount += promotionProduct.getPrice();
+
+        promotionEventResult.put(cart.getName(), existingGiftCount + 1);
+
+        //재고 차감
+        promotionProduct.deductQuantity(cart.getQuantity());
+        return giftCount;
+    }
+
+    private int getGiftCount(Cart cart, Product promotionProduct) {
+        return promotionProduct.calculatePromotionGift(cart);
     }
 
     private Products readeProducts() {
