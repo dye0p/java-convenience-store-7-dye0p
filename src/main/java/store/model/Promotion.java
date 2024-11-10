@@ -25,4 +25,12 @@ public class Promotion {
     public String getName() {
         return name;
     }
+
+    public int getBuy() {
+        return buy;
+    }
+
+    public int getGet() {
+        return get;
+    }
 }

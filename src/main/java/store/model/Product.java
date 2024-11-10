@@ -4,7 +4,7 @@ public class Product {
 
     private final String name;
     private final int price;
-    private final int quantity;
+    private int quantity;
     private final String promotion;
 
     public Product(String name, int price, int quantity, String promotion) {
@@ -12,6 +12,24 @@ public class Product {
         this.price = price;
         this.quantity = quantity;
         this.promotion = promotion;
+    }
+
+    public int calculateNotPromotionQuantity(int quantity) {
+        int nonPromotionQuantity = 0;
+
+        if (promotion.equals("탄산2+1")) {
+            int promotionCount = (this.quantity / 3) * 3;
+            nonPromotionQuantity += quantity - promotionCount;
+        }
+        if (promotion.equals("MD추천상품") || promotion.equals("반짝할인")) {
+            int promotionCount = (this.quantity / 2) * 2;
+            nonPromotionQuantity += quantity - promotionCount;
+        }
+        return nonPromotionQuantity;
+    }
+
+    public void deductQuantity(int quantity) {
+        this.quantity -= quantity;
     }
 
     public boolean isSameName(String name) {
@@ -45,4 +63,5 @@ public class Product {
     public String getPromotion() {
         return promotion;
     }
+
 }
