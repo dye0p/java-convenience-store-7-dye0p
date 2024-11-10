@@ -41,6 +41,16 @@ public class ProductManager {
         return sumQuantity(name, sum);
     }
 
+    public int getPriceByName(Products products, String name) {
+        int price = 0;
+        for (Product product : products.getProducts()) {
+            if (product.isSameName(name)) {
+                price = product.getPrice();
+            }
+        }
+        return price;
+    }
+
     public Product getBasicByName(String name) {
         return basicProducts.get(name);
     }

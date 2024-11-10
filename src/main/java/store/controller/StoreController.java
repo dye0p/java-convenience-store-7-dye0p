@@ -2,6 +2,7 @@ package store.controller;
 
 import camp.nextstep.edu.missionutils.DateTimes;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,10 @@ import store.model.Product;
 import store.model.ProductManager;
 import store.model.Products;
 import store.model.PromotionManager;
+import store.model.receipt.BuyResult;
+import store.model.receipt.PresentationResult;
+import store.model.receipt.PriceResult;
+import store.model.receipt.Receipt;
 import store.view.InputView;
 import store.view.OutputView;
 
@@ -41,7 +46,10 @@ public class StoreController {
         int membershipDiscount = membershipEvent(promotionEventResult);
 
         productsQuantityUpdate(products);
+
+        displayReceipt(carts, products, promotionEventResult, membershipDiscount);
     }
+
 
     private EventResult event(List<Cart> carts) {
         Map<String, Integer> promotionEventResult = new HashMap<>();
@@ -208,6 +216,73 @@ public class StoreController {
     private void productsQuantityUpdate(Products products) {
         FileWriter fileWriter = new FileWriter(products);
         fileWriter.updateProducts();
+    }
+
+    private void displayReceipt(List<Cart> carts, Products products, EventResult promotionEventResult,
+                                int membershipDiscount) {
+        List<BuyResult> buyResults = getBuyResults(carts, products);
+
+        List<PresentationResult> presentationResults = getPresentationResults(promotionEventResult, carts);
+
+        int totalPrice = getTotalPrice(carts, products);
+
+        createReceipt(totalPrice, promotionEventResult, membershipDiscount, buyResults, presentationResults);
+    }
+
+    private List<BuyResult> getBuyResults(List<Cart> carts, Products products) {
+        List<BuyResult> buyResults = new ArrayList<>();
+        for (Cart cart : carts) {
+            String name = cart.getName();
+            int quantity = cart.getQuantity();
+            int price = products.getPriceByName(cart.getName());
+            BuyResult buyResult = new BuyResult(name, quantity, price);
+            buyResults.add(buyResult);
+        }
+        return buyResults;
+    }
+
+    private List<PresentationResult> getPresentationResults(EventResult promotionEventResult,
+                                                            List<Cart> carts) {
+        Map<String, Integer> promotionEventMap = promotionEventResult.getPromotionEventResult();
+        return calculatePresentationResults(carts, promotionEventMap);
+    }
+
+    private List<PresentationResult> calculatePresentationResults(List<Cart> carts,
+                                                                  Map<String, Integer> promotionEventMap) {
+        List<PresentationResult> presentationResults = new ArrayList<>();
+        for (Cart cart : carts) {
+            Integer i = promotionEventMap.get(cart.getName());
+            if (i != null) {
+                PresentationResult presentationResult = new PresentationResult(cart.getName(), i);
+                presentationResults.add(presentationResult);
+            }
+        }
+        return presentationResults;
+    }
+
+    private int getTotalPrice(List<Cart> carts, Products products) {
+        int totalPrice = 0;
+        for (Cart cart : carts) {
+            int quantity = cart.getQuantity(); //수량
+            int price = productManager.getPriceByName(products, cart.getName()); //가격
+
+            totalPrice += quantity * price;
+        }
+        return totalPrice;
+    }
+
+    private void getReceipt(List<BuyResult> buyResults, List<PresentationResult> presentationResults,
+                            PriceResult priceResult) {
+        //영수증 생성 후 출력
+        Receipt receipt = new Receipt(buyResults, presentationResults, priceResult);
+        outputView.printReceipt(receipt);
+    }
+
+    private void createReceipt(int totalPrice, EventResult promotionEventResult, int membershipDiscount,
+                               List<BuyResult> buyResults, List<PresentationResult> presentationResults) {
+        PriceResult priceResult = new PriceResult(totalPrice, promotionEventResult.getGiftCount(),
+                membershipDiscount);
+        getReceipt(buyResults, presentationResults, priceResult);
     }
 
     private Products readeProducts() {
