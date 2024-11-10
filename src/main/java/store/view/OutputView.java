@@ -34,26 +34,31 @@ public class OutputView {
 
     private void buyResultFormating(Receipt receipt) {
         List<BuyResult> buyResult = receipt.getBuyResult();
-        System.out.println("상품명\t\t\t\t수량\t\t\t금액");
+        System.out.printf("%-18s %-8s %s%n", "상품명", "수량", "금액");
         for (BuyResult result : buyResult) {
-            System.out.println(result.getName() + "\t\t\t\t\t" + result.getQuantity() + "\t\t" + String.format("%,d",
-                    (result.getPrice()) * result.getQuantity()));
+            System.out.printf("%-18s %-8d %,d%n", result.getName(), result.getQuantity(),
+                    result.getQuantity() * result.getPrice());
         }
     }
 
     private void presentationResultFormating(Receipt receipt) {
         List<PresentationResult> presentationResult = receipt.getPresentationResult();
-        System.out.println("=============증\t\t정===============");
+        System.out.println("=============증      정===============");
         for (PresentationResult result : presentationResult) {
-            System.out.println(result.getName() + "\t\t\t" + result.getQuantity());
+            System.out.printf("%-18s %-8d%n", result.getName(), result.getQuantity());
         }
     }
 
     private void priceResultFormating(Receipt receipt) {
         System.out.println("====================================");
-        System.out.println("총구매액" + "\t\t\t" + String.format("%,d", receipt.getPriceResult().getTotal()));
-        System.out.println("행사할인" + "\t\t\t" + String.format("-%,d", receipt.getPriceResult().getPresentation()));
-        System.out.println("멤버십할인" + "\t\t\t" + String.format("-%,d", receipt.getPriceResult().getMembership()));
-        System.out.println("내실돈" + "\t\t\t" + String.format("%,d", receipt.getPriceResult().finalPayment()));
+        System.out.printf("%-18s %-8d %,-1d%n", "총구매액", receipt.totalBuyQuantity(),
+                receipt.getPriceResult().getTotal());
+
+        String giftDiscountFormat = String.format("-%,d", receipt.getPriceResult().getPresentation());
+        System.out.printf("%-27s %-1s%n", "행사할인", giftDiscountFormat);
+
+        String membershipDiscountFormat = String.format("-%,d", receipt.getPriceResult().getMembership());
+        System.out.printf("%-27s %-1s%n", "멤버십할인", membershipDiscountFormat);
+        System.out.printf("%-27s %,-1d%n", "내실돈", receipt.getPriceResult().finalPayment());
     }
 }

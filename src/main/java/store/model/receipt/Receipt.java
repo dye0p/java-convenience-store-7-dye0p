@@ -14,6 +14,14 @@ public class Receipt {
         this.priceResult = priceResult;
     }
 
+    public int totalBuyQuantity() {
+        int sum = 0;
+        for (BuyResult result : buyResult) {
+            sum += result.getQuantity();
+        }
+        return sum;
+    }
+
     public List<BuyResult> getBuyResult() {
         return buyResult;
     }
