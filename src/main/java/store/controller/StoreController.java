@@ -172,14 +172,13 @@ public class StoreController {
 
     private int plusGiftCount(Cart cart, Product promotionProduct, int giftCount,
                               Map<String, Integer> promotionEventResult) {
-        //한개를 더 받으면 해당 상품의 수량에 하나를 더 추가한다.
-        cart.plusGiftQuantity();
-
-        //그리고 추가 증정할인이 들어간다.
+        //추가 증정할인이 들어간다.
         //1개만 추가되는것이 아니라 기존의 증정에서 1개가 추가되는 것이다.
         int existingGiftCount = getGiftCount(cart, promotionProduct);
         giftCount += promotionProduct.getPrice();
 
+        //한개를 더 받으면 해당 상품의 수량에 하나를 더 추가한다.
+        cart.plusGiftQuantity();
         promotionEventResult.put(cart.getName(), existingGiftCount + 1);
 
         //재고 차감
