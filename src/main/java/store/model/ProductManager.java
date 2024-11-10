@@ -6,8 +6,8 @@ import store.exception.ErrorMessage;
 
 public class ProductManager {
 
-    private Map<String, Product> basicProducts = new HashMap<>();
-    private Map<String, Product> promotionProducts = new HashMap<>();
+    private final Map<String, Product> basicProducts = new HashMap<>();
+    private final Map<String, Product> promotionProducts = new HashMap<>();
 
     public ProductManager(Products products) {
         for (Product product : products.getProducts()) {

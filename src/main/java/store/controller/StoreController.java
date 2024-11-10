@@ -27,7 +27,7 @@ public class StoreController {
     private final InputView inputView;
     private final OutputView outputView;
     private ProductManager productManager;
-    private PromotionManager promotionManager;
+    private final PromotionManager promotionManager;
 
     public StoreController(InputView inputView, OutputView outputView) {
         this.inputView = inputView;
