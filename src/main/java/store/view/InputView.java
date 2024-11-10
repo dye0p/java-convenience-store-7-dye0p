@@ -35,4 +35,10 @@ public class InputView {
 
         return Console.readLine();
     }
+
+    public String readReplay() {
+        System.out.println(NEXT_LINE + "감사합니다. 구매하고 싶은 다른 상품이 있나요? (Y/N)");
+
+        return Console.readLine();
+    }
 }

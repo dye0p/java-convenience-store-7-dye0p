@@ -48,6 +48,8 @@ public class StoreController {
         productsQuantityUpdate(products);
 
         displayReceipt(carts, products, promotionEventResult, membershipDiscount);
+
+        continueRetry();
     }
 
 
@@ -283,6 +285,14 @@ public class StoreController {
         PriceResult priceResult = new PriceResult(totalPrice, promotionEventResult.getGiftCount(),
                 membershipDiscount);
         getReceipt(buyResults, presentationResults, priceResult);
+    }
+
+    private void continueRetry() {
+        String choice = inputView.readReplay();
+        if (choice.equals("Y")) {
+            System.out.println();
+            run();
+        }
     }
 
     private Products readeProducts() {
