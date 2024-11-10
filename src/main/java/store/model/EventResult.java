@@ -26,4 +26,5 @@ public class EventResult {
     public Map<Cart, Integer> getNonPromotionEventResult() {
         return nonPromotionEventResult;
     }
+
 }

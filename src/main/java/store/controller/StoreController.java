@@ -35,7 +35,9 @@ public class StoreController {
 
         List<Cart> carts = tryReadItem();
 
-        EventResult event = event(carts);
+        EventResult promotionEventResult = event(carts);
+
+        int membershipDiscount = membershipEvent(promotionEventResult);
     }
 
     private EventResult event(List<Cart> carts) {
@@ -174,6 +176,30 @@ public class StoreController {
 
     private int getGiftCount(Cart cart, Product promotionProduct) {
         return promotionProduct.calculatePromotionGift(cart);
+    }
+
+    private int membershipEvent(EventResult promotionEventResult) {
+        int nonPromotionPrice = getNonPromotionPrice(promotionEventResult);
+        String choice = inputView.readMemberShip();
+        int membershipDiscount = 0;
+        if (choice.equals("Y")) {
+            membershipDiscount += nonPromotionPrice * 0.3;
+        }
+        return membershipDiscount;
+    }
+
+    private int getNonPromotionPrice(EventResult promotionEventResult) {
+        Map<Cart, Integer> nonPromotionProducts = promotionEventResult.getNonPromotionEventResult();
+        return calculateNonPromotionPrice(nonPromotionProducts);
+    }
+
+    private int calculateNonPromotionPrice(Map<Cart, Integer> nonPromotionProducts) {
+        int nonPromotionPrice = 0;
+        for (Cart cart : nonPromotionProducts.keySet()) {
+            int price = nonPromotionProducts.get(cart);
+            nonPromotionPrice += cart.getQuantity() * price;
+        }
+        return nonPromotionPrice;
     }
 
     private Products readeProducts() {

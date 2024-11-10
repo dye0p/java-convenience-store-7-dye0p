@@ -29,4 +29,10 @@ public class InputView {
 
         return Console.readLine();
     }
+
+    public String readMemberShip() {
+        System.out.println(NEXT_LINE + "멤버십 할인을 받으시겠습니까? (Y/N)");
+
+        return Console.readLine();
+    }
 }
