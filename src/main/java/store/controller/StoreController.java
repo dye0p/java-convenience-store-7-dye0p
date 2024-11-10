@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import store.exception.ErrorMessage;
 import store.filereader.FileReader;
+import store.filereader.FileWriter;
 import store.model.Cart;
 import store.model.EventResult;
 import store.model.Product;
@@ -38,6 +39,8 @@ public class StoreController {
         EventResult promotionEventResult = event(carts);
 
         int membershipDiscount = membershipEvent(promotionEventResult);
+
+        productsQuantityUpdate(products);
     }
 
     private EventResult event(List<Cart> carts) {
@@ -200,6 +203,11 @@ public class StoreController {
             nonPromotionPrice += cart.getQuantity() * price;
         }
         return nonPromotionPrice;
+    }
+
+    private void productsQuantityUpdate(Products products) {
+        FileWriter fileWriter = new FileWriter(products);
+        fileWriter.updateProducts();
     }
 
     private Products readeProducts() {
