@@ -14,7 +14,6 @@ public class Receipt {
         this.priceResult = priceResult;
     }
 
-
     public List<BuyResult> getBuyResult() {
         return buyResult;
     }
@@ -25,9 +24,5 @@ public class Receipt {
 
     public PriceResult getPriceResult() {
         return priceResult;
-    }
-
-    public int getTotal() {
-        return priceResult.finalPayment();
     }
 }
