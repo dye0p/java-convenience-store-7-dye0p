@@ -22,7 +22,7 @@ public class OutputView {
     }
 
     public void printErrorMessage(String message) {
-        System.out.print(message);
+        System.out.println(message);
     }
 
     public void printReceipt(Receipt receipt) {

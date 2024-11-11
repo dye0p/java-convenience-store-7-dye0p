@@ -115,7 +115,8 @@ public class StoreController {
 
     private int selectPromotionQuantity(Cart cart, int nonPromotionQuantity, Product promotionProduct,
                                         Map<String, Integer> promotionEventResult, int giftCount) {
-        String choice = inputView.readEnoughPromotionQuantity(cart.getName(), nonPromotionQuantity);
+
+        String choice = tryReadEnoughPromotionQuantity(cart, nonPromotionQuantity);
         if (choice.equals(YES_CHOICE)) {
             giftCount = giftAccept(cart, promotionProduct, promotionEventResult, giftCount);
         }
@@ -124,6 +125,7 @@ public class StoreController {
         }
         return giftCount;
     }
+
 
     private int giftAccept(Cart cart, Product promotionProduct, Map<String, Integer> promotionEventResult,
                            int giftCount) {
@@ -159,7 +161,7 @@ public class StoreController {
 
     private int handleAddGift(Cart cart, Product promotionProduct, int giftCount,
                               Map<String, Integer> promotionEventResult) {
-        String choice = inputView.readGift(cart.getName());
+        String choice = tryReadGift(cart);
         if (choice.equals(YES_CHOICE)) {
             giftCount = plusGiftCount(cart, promotionProduct, giftCount, promotionEventResult);
         }
@@ -193,7 +195,7 @@ public class StoreController {
     }
 
     private int membershipEvent(EventResult eventResult) {
-        String choice = inputView.readMemberShip();
+        String choice = tryReadMembership();
         int discountPrice = 0;
         if (choice.equals(YES_CHOICE)) {
             discountPrice = progressDiscount(eventResult);
@@ -290,7 +292,7 @@ public class StoreController {
     }
 
     private void continueRetry() {
-        String choice = inputView.readReplay();
+        String choice = tryReadReplay();
         if (choice.equals(YES_CHOICE)) {
             System.out.println();
             run();
@@ -320,6 +322,54 @@ public class StoreController {
         }
     }
 
+    private String tryReadEnoughPromotionQuantity(Cart cart, int nonPromotionQuantity) {
+        while (true) {
+            try {
+                String choice = inputView.readEnoughPromotionQuantity(cart.getName(), nonPromotionQuantity);
+                validateYesOrNo(choice);
+                return choice;
+            } catch (IllegalArgumentException exception) {
+                outputView.printErrorMessage(exception.getMessage());
+            }
+        }
+    }
+
+    private String tryReadGift(Cart cart) {
+        while (true) {
+            try {
+                String choice = inputView.readGift(cart.getName());
+                validateYesOrNo(choice);
+                return choice;
+            } catch (IllegalArgumentException exception) {
+                outputView.printErrorMessage(exception.getMessage());
+            }
+        }
+    }
+
+    private String tryReadMembership() {
+        while (true) {
+            try {
+                String choice = inputView.readMemberShip();
+                validateYesOrNo(choice);
+                return choice;
+            } catch (IllegalArgumentException exception) {
+                outputView.printErrorMessage(exception.getMessage());
+            }
+        }
+    }
+
+    private String tryReadReplay() {
+        while (true) {
+            try {
+                String choice = inputView.readReplay();
+                validateYesOrNo(choice);
+                return choice;
+            } catch (IllegalArgumentException exception) {
+                outputView.printErrorMessage(exception.getMessage());
+            }
+        }
+    }
+
     private void validate(List<Cart> carts) {
         validateNonexistent(carts);
         validateExceedQuantity(carts);
@@ -338,6 +388,12 @@ public class StoreController {
             if (quantity > productQuantity) {
                 throw new IllegalArgumentException(ErrorMessage.EXCEED_STOCK_QUANTITY.getMessage());
             }
+        }
+    }
+
+    private void validateYesOrNo(String choice) {
+        if (!choice.equals(YES_CHOICE) && !choice.equals(NO_CHOICE)) {
+            throw new IllegalArgumentException(ErrorMessage.INVALID_INPUT.getMessage());
         }
     }
 }
