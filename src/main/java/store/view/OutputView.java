@@ -3,7 +3,7 @@ package store.view;
 import java.util.List;
 import store.model.Products;
 import store.model.receipt.BuyResult;
-import store.model.receipt.PresentationResult;
+import store.model.receipt.GiftResult;
 import store.model.receipt.Receipt;
 
 public class OutputView {
@@ -42,9 +42,9 @@ public class OutputView {
     }
 
     private void presentationResultFormating(Receipt receipt) {
-        List<PresentationResult> presentationResult = receipt.getPresentationResult();
+        List<GiftResult> giftResult = receipt.getPresentationResult();
         System.out.println("=============증      정===============");
-        for (PresentationResult result : presentationResult) {
+        for (GiftResult result : giftResult) {
             System.out.printf("%-18s %-8d%n", result.getName(), result.getQuantity());
         }
     }
@@ -54,7 +54,7 @@ public class OutputView {
         System.out.printf("%-18s %-8d %,-1d%n", "총구매액", receipt.totalBuyQuantity(),
                 receipt.getPriceResult().getTotal());
 
-        String giftDiscountFormat = String.format("-%,d", receipt.getPriceResult().getPresentation());
+        String giftDiscountFormat = String.format("-%,d", receipt.getPriceResult().getGift());
         System.out.printf("%-27s %-1s%n", "행사할인", giftDiscountFormat);
 
         String membershipDiscountFormat = String.format("-%,d", receipt.getPriceResult().getMembership());

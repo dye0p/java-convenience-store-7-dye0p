@@ -1,11 +1,11 @@
 package store.model.receipt;
 
-public class PresentationResult {
+public class GiftResult {
 
     private final String name;
     private final int quantity;
 
-    public PresentationResult(String name, int quantity) {
+    public GiftResult(String name, int quantity) {
         this.name = name;
         this.quantity = quantity;
     }

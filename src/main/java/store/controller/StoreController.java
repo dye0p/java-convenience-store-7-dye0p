@@ -17,7 +17,7 @@ import store.model.ProductManager;
 import store.model.Products;
 import store.model.PromotionManager;
 import store.model.receipt.BuyResult;
-import store.model.receipt.PresentationResult;
+import store.model.receipt.GiftResult;
 import store.model.receipt.PriceResult;
 import store.model.receipt.Receipt;
 import store.view.InputView;
@@ -232,11 +232,11 @@ public class StoreController {
                                 int membershipDiscount) {
         List<BuyResult> buyResults = getBuyResults(carts, products);
 
-        List<PresentationResult> presentationResults = getPresentationResults(promotionEventResult, carts);
+        List<GiftResult> giftResults = getPresentationResults(promotionEventResult, carts);
 
         int totalPrice = getTotalPrice(carts, products);
 
-        createReceipt(totalPrice, promotionEventResult, membershipDiscount, buyResults, presentationResults);
+        createReceipt(totalPrice, promotionEventResult, membershipDiscount, buyResults, giftResults);
     }
 
     private List<BuyResult> getBuyResults(List<Cart> carts, Products products) {
@@ -251,22 +251,22 @@ public class StoreController {
         return buyResults;
     }
 
-    private List<PresentationResult> getPresentationResults(EventResult promotionEventResult, List<Cart> carts) {
+    private List<GiftResult> getPresentationResults(EventResult promotionEventResult, List<Cart> carts) {
         Map<String, Integer> promotionEventMap = promotionEventResult.getPromotionEventResult();
         return calculatePresentationResults(carts, promotionEventMap);
     }
 
-    private List<PresentationResult> calculatePresentationResults(List<Cart> carts,
-                                                                  Map<String, Integer> promotionEventResult) {
-        List<PresentationResult> presentationResults = new ArrayList<>();
+    private List<GiftResult> calculatePresentationResults(List<Cart> carts,
+                                                          Map<String, Integer> promotionEventResult) {
+        List<GiftResult> giftResults = new ArrayList<>();
         for (Cart cart : carts) {
             Integer i = promotionEventResult.get(cart.getName());
             if (i != null) {
-                PresentationResult presentationResult = new PresentationResult(cart.getName(), i);
-                presentationResults.add(presentationResult);
+                GiftResult giftResult = new GiftResult(cart.getName(), i);
+                giftResults.add(giftResult);
             }
         }
-        return presentationResults;
+        return giftResults;
     }
 
     private int getTotalPrice(List<Cart> carts, Products products) {
@@ -279,16 +279,16 @@ public class StoreController {
         return totalPrice;
     }
 
-    private void getReceipt(List<BuyResult> buyResults, List<PresentationResult> presentationResults,
+    private void getReceipt(List<BuyResult> buyResults, List<GiftResult> giftResults,
                             PriceResult priceResult) {
-        Receipt receipt = new Receipt(buyResults, presentationResults, priceResult);
+        Receipt receipt = new Receipt(buyResults, giftResults, priceResult);
         outputView.printReceipt(receipt);
     }
 
     private void createReceipt(int totalPrice, EventResult promotionEventResult, int membershipDiscount,
-                               List<BuyResult> buyResults, List<PresentationResult> presentationResults) {
+                               List<BuyResult> buyResults, List<GiftResult> giftResults) {
         PriceResult priceResult = new PriceResult(totalPrice, promotionEventResult.getGiftCount(), membershipDiscount);
-        getReceipt(buyResults, presentationResults, priceResult);
+        getReceipt(buyResults, giftResults, priceResult);
     }
 
     private void continueRetry() {

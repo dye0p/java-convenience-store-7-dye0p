@@ -5,12 +5,12 @@ import java.util.List;
 public class Receipt {
 
     private final List<BuyResult> buyResult;
-    private final List<PresentationResult> presentationResult;
+    private final List<GiftResult> giftResult;
     private final PriceResult priceResult;
 
-    public Receipt(List<BuyResult> buyResult, List<PresentationResult> presentationResult, PriceResult priceResult) {
+    public Receipt(List<BuyResult> buyResult, List<GiftResult> giftResult, PriceResult priceResult) {
         this.buyResult = buyResult;
-        this.presentationResult = presentationResult;
+        this.giftResult = giftResult;
         this.priceResult = priceResult;
     }
 
@@ -26,8 +26,8 @@ public class Receipt {
         return buyResult;
     }
 
-    public List<PresentationResult> getPresentationResult() {
-        return presentationResult;
+    public List<GiftResult> getPresentationResult() {
+        return giftResult;
     }
 
     public PriceResult getPriceResult() {
