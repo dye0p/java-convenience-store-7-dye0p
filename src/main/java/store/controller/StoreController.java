@@ -56,7 +56,6 @@ public class StoreController {
         continueRetry();
     }
 
-
     private EventResult event(List<Cart> carts) {
         Map<String, Integer> promotionEventResult = new HashMap<>();
         Map<Cart, Integer> nonPromotionResult = new HashMap<>();
@@ -73,22 +72,24 @@ public class StoreController {
         if (productManager.isPromotionProduct(cart.getName())) {
             Product promotionProduct = productManager.getPromotionByName(cart.getName());
             if (promotionProduct != null) {
-                giftCount = todayPromotionAvailable(cart, promotionProduct, giftCount, promotionEventResult);
+                return todayPromotionAvailable(cart, promotionProduct, giftCount, promotionEventResult);
             }
-        } else {
-            // 일반 상품은 프로모션 혜택이 없음
-            Product basicProduct = productManager.getBasicByName(cart.getName());
-            nonPromotionItems.put(cart, basicProduct.getPrice());
-            basicProduct.deductQuantity(cart.getQuantity()); //재고 변경
         }
+        regularProductPayment(cart, nonPromotionItems);
+
         return giftCount;
+    }
+
+    private void regularProductPayment(Cart cart, Map<Cart, Integer> nonPromotionItems) {
+        Product basicProduct = productManager.getBasicByName(cart.getName());
+        nonPromotionItems.put(cart, basicProduct.getPrice());
+        basicProduct.deductQuantity(cart.getQuantity());
     }
 
     private int todayPromotionAvailable(Cart cart, Product promotionProduct, int giftCount,
                                         Map<String, Integer> promotionEventResult) {
         LocalDateTime now = DateTimes.now();
         if (promotionManager.isTodayPromotionAvailable(promotionProduct.getPromotion(), now)) {
-
             giftCount = progressPromotionEvent(cart, giftCount, promotionProduct, promotionEventResult);
         }
         return giftCount;
@@ -96,36 +97,20 @@ public class StoreController {
 
     private int progressPromotionEvent(Cart cart, int giftCount, Product promotionProduct,
                                        Map<String, Integer> promotionEventResult) {
-        giftCount = notEnoughPromotionQuantity(cart, promotionProduct, giftCount, promotionEventResult);
-
-        // 프로모션 적용이 가능한 상품에 대해 고객이 해당 수량보다 적게 가져온 경우, 그 수량만큼 추가 여부를 입력받는다
+        if (cart.getQuantity() > promotionProduct.getQuantity()) {
+            return notEnoughPromotionQuantity(cart, promotionProduct, giftCount, promotionEventResult);
+        }
         if (cart.getQuantity() <= promotionProduct.getQuantity() && !promotionManager.isNotEnoughPromotionQuantity(
                 cart.getQuantity(), promotionProduct)) {
-            giftCount = handleAddGift(cart, promotionProduct, giftCount, promotionEventResult);
+            return handleAddGift(cart, promotionProduct, giftCount, promotionEventResult);
         }
-
-        //아무조건도 안걸릴때
-        else if (cart.getQuantity() <= promotionProduct.getQuantity() && promotionManager.isNotEnoughPromotionQuantity(
-                cart.getQuantity(), promotionProduct)) {
-            //수입량 수량에 따라서 받을 수 있는 증정 개수 계산
-            int freeCount = getGiftCount(cart, promotionProduct);
-            promotionEventResult.put(cart.getName(), freeCount);
-            giftCount += promotionProduct.getPrice() * freeCount;
-            //재고 차감
-            promotionProduct.deductQuantity(cart.getQuantity());
-        }
-
-        return giftCount;
+        return defaultPromotion(cart, giftCount, promotionProduct, promotionEventResult);
     }
 
     private int notEnoughPromotionQuantity(Cart cart, Product promotionProduct, int giftCount,
                                            Map<String, Integer> promotionEventResult) {
-        if (cart.getQuantity() > promotionProduct.getQuantity()) {
-            int nonPromotionQuantity = promotionManager.notPromotionByQuantity(cart.getQuantity(), promotionProduct);
-            giftCount = selectPromotionQuantity(cart, nonPromotionQuantity, promotionProduct, promotionEventResult,
-                    giftCount);
-        }
-        return giftCount;
+        int nonPromotionQuantity = promotionManager.notPromotionByQuantity(cart.getQuantity(), promotionProduct);
+        return selectPromotionQuantity(cart, nonPromotionQuantity, promotionProduct, promotionEventResult, giftCount);
     }
 
     private int selectPromotionQuantity(Cart cart, int nonPromotionQuantity, Product promotionProduct,
@@ -142,25 +127,33 @@ public class StoreController {
 
     private int giftAccept(Cart cart, Product promotionProduct, Map<String, Integer> promotionEventResult,
                            int giftCount) {
-        //받을 수 있는 증정 개수 담기
         int maxGiftCount = promotionManager.calculateGiftCount(promotionProduct);
-        promotionEventResult.put(cart.getName(), maxGiftCount);
-        giftCount += promotionProduct.getPrice() * maxGiftCount;
-        //일부 수량에 대해 정가로 결제한다.
-        //프로모션 상품은 모두 차감하고 모자란 만킄 일반 재고에서 나머지를 차감한다.
-        //일반 재고에서 나머지를 차감한다.
+        giftCount = updateGiftCount(cart, promotionProduct, promotionEventResult, giftCount, maxGiftCount);
+
         int beforeQuantity = promotionProduct.getQuantity();
         promotionProduct.deductQuantity(beforeQuantity);
+
         Product basicByName = productManager.getBasicByName(cart.getName());
-        int quantity = cart.getQuantity() - beforeQuantity;
-        basicByName.deductQuantity(quantity);
+        deductRegularQuantity(cart, beforeQuantity, basicByName);
+
         return giftCount;
     }
 
+    private int updateGiftCount(Cart cart, Product promotionProduct, Map<String, Integer> promotionEventResult,
+                                int giftCount, int maxGiftCount) {
+        promotionEventResult.put(cart.getName(), maxGiftCount);
+        giftCount += promotionProduct.getPrice() * maxGiftCount;
+        return giftCount;
+    }
+
+    private void deductRegularQuantity(Cart cart, int beforeQuantity, Product basicByName) {
+        int quantity = cart.getQuantity() - beforeQuantity;
+        basicByName.deductQuantity(quantity);
+    }
+
     private void giftRefuse(Cart cart, Product promotionProduct) {
-        // 정가로 결제해야하는 수량만큼 제외한 후 결제를 진행한다.
         int quantity = cart.getQuantity() - promotionProduct.getQuantity();
-        cart.changeQuantity(quantity); //구입 수량 변경
+        cart.changeQuantity(quantity);
         promotionProduct.deductQuantity(promotionProduct.getQuantity());
     }
 
@@ -176,16 +169,21 @@ public class StoreController {
 
     private int plusGiftCount(Cart cart, Product promotionProduct, int giftCount,
                               Map<String, Integer> promotionEventResult) {
-        //추가 증정할인이 들어간다.
-        //1개만 추가되는것이 아니라 기존의 증정에서 1개가 추가되는 것이다.
         int existingGiftCount = getGiftCount(cart, promotionProduct);
         giftCount += promotionProduct.getPrice();
 
-        //한개를 더 받으면 해당 상품의 수량에 하나를 더 추가한다.
         cart.plusGiftQuantity();
         promotionEventResult.put(cart.getName(), existingGiftCount + 1);
 
-        //재고 차감
+        promotionProduct.deductQuantity(cart.getQuantity());
+        return giftCount;
+    }
+
+    private int defaultPromotion(Cart cart, int giftCount, Product promotionProduct,
+                                 Map<String, Integer> promotionEventResult) {
+        int freeCount = getGiftCount(cart, promotionProduct);
+        promotionEventResult.put(cart.getName(), freeCount);
+        giftCount += promotionProduct.getPrice() * freeCount;
         promotionProduct.deductQuantity(cart.getQuantity());
         return giftCount;
     }
@@ -257,10 +255,10 @@ public class StoreController {
     }
 
     private List<PresentationResult> calculatePresentationResults(List<Cart> carts,
-                                                                  Map<String, Integer> promotionEventMap) {
+                                                                  Map<String, Integer> promotionEventResult) {
         List<PresentationResult> presentationResults = new ArrayList<>();
         for (Cart cart : carts) {
-            Integer i = promotionEventMap.get(cart.getName());
+            Integer i = promotionEventResult.get(cart.getName());
             if (i != null) {
                 PresentationResult presentationResult = new PresentationResult(cart.getName(), i);
                 presentationResults.add(presentationResult);
@@ -272,9 +270,8 @@ public class StoreController {
     private int getTotalPrice(List<Cart> carts, Products products) {
         int totalPrice = 0;
         for (Cart cart : carts) {
-            int quantity = cart.getQuantity(); //수량
-            int price = productManager.getPriceByName(products, cart.getName()); //가격
-
+            int quantity = cart.getQuantity();
+            int price = productManager.getPriceByName(products, cart.getName());
             totalPrice += quantity * price;
         }
         return totalPrice;
@@ -282,7 +279,6 @@ public class StoreController {
 
     private void getReceipt(List<BuyResult> buyResults, List<PresentationResult> presentationResults,
                             PriceResult priceResult) {
-        //영수증 생성 후 출력
         Receipt receipt = new Receipt(buyResults, presentationResults, priceResult);
         outputView.printReceipt(receipt);
     }
