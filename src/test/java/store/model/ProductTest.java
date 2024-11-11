@@ -60,4 +60,32 @@ class ProductTest {
         //then
         assertThat(result).isTrue();
     }
+
+    @DisplayName("지정된 개수만큼 재고 수량을 차감한다.")
+    @Test
+    void deductQuantity() {
+        //given
+        int deductQuantity = 3;
+        Product product = new Product("콜라", 1000, 5, "탄산2+1");
+
+        //when
+        product.deductQuantity(deductQuantity);
+
+        //then
+        assertThat(product.getQuantity()).isEqualTo(2);
+    }
+
+    @DisplayName("프로모션 상품의 프로모션에 따라서 증정받을 수 있는 증정 개수를 계산한다.")
+    @Test
+    void calculatePromotionGift() {
+        //given
+        Cart cart = new Cart("콜라", 4);
+        Product product = new Product("콜라", 1000, 5, "탄산2+1");
+
+        //when
+        int giftCount = product.calculatePromotionGift(cart);
+
+        //then
+        assertThat(giftCount).isEqualTo(1);
+    }
 }
