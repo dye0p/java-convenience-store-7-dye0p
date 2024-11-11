@@ -2,6 +2,9 @@ package store.model;
 
 public class Product {
 
+    private static final int ONE_PLUS_OEN_CONDITION = 2;
+    private static final int TWO_PLUS_ONE_CONDITION = 3;
+
     private final String name;
     private final int price;
     private int quantity;
@@ -16,15 +19,8 @@ public class Product {
 
     public int calculatePromotionGift(Cart cart) {
         int giftCount = 0;
-        if (this.promotion.equals("탄산2+1")) {
-            int quantity = cart.getQuantity();
-            giftCount += quantity / 3;
-        }
-
-        if (this.promotion.equals("MD추천상품") || this.promotion.equals("반짝할인")) {
-            int quantity = cart.getQuantity();
-            giftCount += quantity / 2;
-        }
+        giftCount = twoPlusOnePromotionCalculate(cart, giftCount);
+        giftCount = onePlusOenPromotionCalculate(cart, giftCount);
         return giftCount;
     }
 
@@ -32,11 +28,11 @@ public class Product {
         int nonPromotionQuantity = 0;
 
         if (promotion.equals("탄산2+1")) {
-            int promotionCount = (this.quantity / 3) * 3;
+            int promotionCount = (this.quantity / TWO_PLUS_ONE_CONDITION) * TWO_PLUS_ONE_CONDITION;
             nonPromotionQuantity += quantity - promotionCount;
         }
         if (promotion.equals("MD추천상품") || promotion.equals("반짝할인")) {
-            int promotionCount = (this.quantity / 2) * 2;
+            int promotionCount = (this.quantity / ONE_PLUS_OEN_CONDITION) * ONE_PLUS_OEN_CONDITION;
             nonPromotionQuantity += quantity - promotionCount;
         }
         return nonPromotionQuantity;
@@ -60,6 +56,22 @@ public class Product {
 
     public boolean hasPromotion() {
         return promotion != null;
+    }
+
+    private int onePlusOenPromotionCalculate(Cart cart, int giftCount) {
+        if (this.promotion.equals("MD추천상품") || this.promotion.equals("반짝할인")) {
+            int cartQuantity = cart.getQuantity();
+            giftCount += cartQuantity / ONE_PLUS_OEN_CONDITION;
+        }
+        return giftCount;
+    }
+
+    private int twoPlusOnePromotionCalculate(Cart cart, int giftCount) {
+        if (this.promotion.equals("탄산2+1")) {
+            int cartQuantity = cart.getQuantity();
+            giftCount += cartQuantity / TWO_PLUS_ONE_CONDITION;
+        }
+        return giftCount;
     }
 
     public String getName() {
