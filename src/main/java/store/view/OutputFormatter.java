@@ -8,8 +8,12 @@ import store.model.Products;
 
 public class OutputFormatter {
 
+    private static final String NEXT_LINE = System.lineSeparator();
+    private static final String PRODUCTS_DETAILS_FORMAT = "- %s %,d원 %s%s";
+    private static final String OUT_OF_QUANTITY_DETAILS_FORMAT = "- %s %,d원 재고 없음";
+
     public static String formatterProducts(Products products) {
-        StringJoiner sj = new StringJoiner("\n");
+        StringJoiner sj = new StringJoiner(NEXT_LINE);
         Map<String, Boolean> regularStockStatus = checkRegularStock(products);
 
         for (Product product : products.getProducts()) {
@@ -30,24 +34,22 @@ public class OutputFormatter {
 
     private static String formatProductDetails(Product product, Map<String, Boolean> stockStatus) {
         String name = product.getName();
-        String quantityString = "재고 없음";
+        String quantity = "재고 없음";
 
         if (product.isInStock()) {
-            quantityString = product.getQuantity() + "개";
+            quantity = product.getQuantity() + "개";
         }
 
-        String promotionString = "";
+        String promotion = "";
         if (product.hasPromotion()) {
-            promotionString = " " + product.getPromotion();
+            promotion = " " + product.getPromotion();
         }
 
-        String productDetails = String.format("- %s %,d원 %s%s", name, product.getPrice(), quantityString,
-                promotionString);
+        String productDetails = String.format(PRODUCTS_DETAILS_FORMAT, name, product.getPrice(), quantity, promotion);
 
-        // 일반 상품이 없고 프로모션 상품만 있는 경우 '재고 없음' 추가
         if (product.hasPromotion() && Boolean.TRUE.equals(!stockStatus.getOrDefault(name, false))) {
-            String noStockDetails = String.format("- %s %,d원 재고 없음", name, product.getPrice());
-            return productDetails + "\n" + noStockDetails;
+            String noStockDetails = String.format(OUT_OF_QUANTITY_DETAILS_FORMAT, name, product.getPrice());
+            return productDetails + NEXT_LINE + noStockDetails;
         }
         return productDetails;
     }
