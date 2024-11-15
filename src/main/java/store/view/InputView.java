@@ -1,0 +1,44 @@
+package store.view;
+
+import camp.nextstep.edu.missionutils.Console;
+import java.util.List;
+import store.model.Cart;
+
+public class InputView {
+
+    private static final String NEXT_LINE = System.lineSeparator();
+
+    public List<Cart> readItem() {
+        System.out.println(NEXT_LINE + "구매하실 상품명과 수량을 입력해 주세요. (예: [사이다-2],[감자칩-1])");
+        String input = Console.readLine();
+
+        return InputConverter.converter(input);
+    }
+
+    public String readEnoughPromotionQuantity(String name, int nonPromotionQuantity) {
+        String format = String.format("현재 %s %d개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)",
+                name, nonPromotionQuantity);
+        System.out.println(NEXT_LINE + format);
+
+        return Console.readLine();
+    }
+
+    public String readGift(String name) {
+        String format = String.format("현재 %s은(는) 1개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)", name);
+        System.out.println(NEXT_LINE + format);
+
+        return Console.readLine();
+    }
+
+    public String readMemberShip() {
+        System.out.println(NEXT_LINE + "멤버십 할인을 받으시겠습니까? (Y/N)");
+
+        return Console.readLine();
+    }
+
+    public String readReplay() {
+        System.out.println(NEXT_LINE + "감사합니다. 구매하고 싶은 다른 상품이 있나요? (Y/N)");
+
+        return Console.readLine();
+    }
+}
